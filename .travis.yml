@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+- '6'
+branches:
+  only:
+  - "/^v[0-9]/"
+cache:
+  yarn: true
+before_install:
+- curl -o- -L https://yarnpkg.com/install.sh | bash
+- export PATH=$HOME/.yarn/bin:$PATH
+script:
+- yarn test
+deploy:
+  provider: npm
+  email: serveradmin@octoblu.com
+  api_key:
+    secure: "mpQ/H5IciZjpAAwL8seyPfDdq9P68zIk2/FiMHytLf43xN9QcQ59P4r0ALInxYhyHvb1iiQ9lNvHXHUffO5eboGfrMdjNkZq/gkQEBxfkomNAyb1nkSkwbuU8wrzLuFERRDUFBXwxNqkRXxSZc922lDLQ9FqQgbuK78b4h/mtBldnqByuvx28yGU7qH3v5YI+CsdmRx+AJh9fuR0uHwMAkZVqEl1fodSMLMXqJEqWGQxOeCJsTiJ0Sl9qDD5qT2JmkkXIBYsVW1Utb0WGIQdTLmQeaZsngiw3yJkUz5R5QlH6jzX9yD+wK9Y7zhsDDXFrNMqNDj6dokTVQYSgmvfX40/GjIaj8y0Hbe8DnbxVQYBsPGVMrwZ8WEDoXBW1e5gedB+5nxEaeaY1ACCJ4WLSrXYLxvk4cNrmvnUtfUGSYf3QUHCDHPmpzpgyIJ1pZ5iN6vD8ttQY3bd8HKO70Gt+K3LyxmdHcPoUuimXEp1L2eMVqzwyFGKuRHJ+l0fKpbuOBfuxWQGoDMXmuxoehQhfXUQKzlu155TIiR8gCOd+nEMO50+4cyRy+ue2I//e5DpQ8iTrpU1tsipWyIK9aF5rrjJkD8F9H+C7eM36F/Qxb+YXNBoEXIS3QEuzEq0zsqOSBEOlyK32wm4QgjEPGLpe7JqwrPyzsQriuxBZ/q83iE="
+  on:
+    tags: true
+    branches: true
