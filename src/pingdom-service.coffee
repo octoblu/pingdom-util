@@ -17,11 +17,6 @@ class PingdomService
       return callback null if check?
       @_create { hostname, pathname }, callback
 
-  resultsByTag: ({}, callback) =>
-    @_getChecksByTag {}, (error, tags) =>
-      return callback error if error?
-      async.mapValues tags, @_getResultsForTag, callback
-
   _create: ({ hostname, pathname }, callback) =>
     body = {
       name: hostname
@@ -39,8 +34,13 @@ class PingdomService
       debug 'response', response
       callback null
 
-  _getResultsForTag: (checks, key, callback) =>
-    async.mapValues checks, @_getResultsForCheck, (error, allResults) =>
+  resultsByTag: ({ to, from }, callback) =>
+    @_getChecksByTag {}, (error, tags) =>
+      return callback error if error?
+      async.mapValues tags, async.apply(@_getResultsForTag, { to, from }), callback
+
+  _getResultsForTag: (options, checks, key, callback) =>
+    async.mapValues checks, async.apply(@_getResultsForCheck, options), (error, allResults) =>
       return callback error if error?
       minutes = {}
       _.each _.values(allResults), (checkResults) =>
@@ -52,7 +52,7 @@ class PingdomService
       total = _.size _.values(minutes)
       passes = _.size _.filter(_.values(minutes), 'up')
       failures = total - passes
-      percent = "#{(total / passes) * 100}%"
+      percent = "#{_.round((passes / total) * 100, 3)}%"
       callback null, {
         percent,
         total,
@@ -60,10 +60,16 @@ class PingdomService
         passes,
       }
 
-  _getResultsForCheck: ({ id }, key, callback) =>
-    @_request { method: 'GET', uri: "/results/#{id}" }, (error, body) =>
+  _getResultsForCheck: ({ offset, to, from, previous }, { id }, key, callback) =>
+    options = _.pickBy { offset, to, from }
+    @_request { method: 'GET', uri: "/results/#{id}", qs: options }, (error, body) =>
       return callback error if error?
-      callback null, _.get(body, 'results', [])
+      results = _.get body, 'results', []
+      count = _.size results
+      results = _.union results, previous if previous?
+      if count < 1000
+        return callback null, results
+      @_getResultsForCheck { offset: count, to, from, previous: results }, { id }, key, callback
 
   _getTime: ({ time }) =>
     return time - (time % (60))

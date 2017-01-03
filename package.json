@@ -1,6 +1,6 @@
 {
   "name": "pingdom-util",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "CLI utility for dealing with Pingdom",
   "keywords": [
     "pingdom"
