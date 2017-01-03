@@ -1,6 +1,6 @@
 {
   "name": "pingdom-util",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "CLI utility for dealing with Pingdom",
   "keywords": [
     "pingdom"
@@ -12,8 +12,9 @@
     "url": "https://github.com/octoblu"
   },
   "bin": {
-    "pingdom-configure": "./command-configure.js",
-    "pingdom": "./command.js"
+    "pingdom-util-configure": "./command-configure.js",
+    "pingdom-util-results-by-tag": "./command-results-by-tag.js",
+    "pingdom-util": "./command.js"
   },
   "repository": {
     "type": "git",

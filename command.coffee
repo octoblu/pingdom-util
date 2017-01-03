@@ -5,6 +5,7 @@ packageJSON = require './package.json'
 program
   .version packageJSON.version
   .command 'configure', 'configure a project to use pingdom'
+  .command 'results-by-tag', 'get results by tag'
 
 class Command
   constructor: ->

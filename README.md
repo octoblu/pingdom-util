@@ -21,7 +21,15 @@ npm install --global pingdom-util
 ### configure
 
 ```bash
-pingdom configure
+pingdom-util configure
+```
+
+Configures a project to work with the pingdom service.
+
+### results-by-tag
+
+```bash
+pingdom-util results-by-tag
 ```
 
 Configures a project to work with the pingdom service.
