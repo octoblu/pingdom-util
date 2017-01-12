@@ -37,10 +37,11 @@ class PingdomService
   resultsByTag: ({ to, from }, callback) =>
     @_getChecksByTag {}, (error, tags) =>
       return callback error if error?
-      async.mapValues tags, async.apply(@_getResultsForTag, { to, from }), callback
+      async.mapValuesLimit tags, 10, async.apply(@_getResultsForTag, { to, from }), callback
 
   _getResultsForTag: (options, checks, key, callback) =>
-    async.mapValues checks, async.apply(@_getResultsForCheck, options), (error, allResults) =>
+    debug 'get results for tag'
+    async.mapValuesLimit checks, 20, async.apply(@_getResultsForCheck, options), (error, allResults) =>
       return callback error if error?
       minutes = {}
       _.each _.values(allResults), (checkResults) =>
@@ -60,16 +61,21 @@ class PingdomService
         passes,
       }
 
-  _getResultsForCheck: ({ offset, to, from, previous }, { id }, key, callback) =>
-    options = _.pickBy { offset, to, from }
+  _getResultsForCheck: ({ offset, to, from, previous, i=0 }, { id }, key, callback) =>
+    limit = 1000
+    debug 'get results options', { i, to, from, offset, limit }
+    options = _.pickBy { offset, to, from, limit }
     @_request { method: 'GET', uri: "/results/#{id}", qs: options }, (error, body) =>
       return callback error if error?
       results = _.get body, 'results', []
       count = _.size results
       results = _.union results, previous if previous?
-      if count < 1000
+      debug 'results count', count
+      if count < limit
         return callback null, results
-      @_getResultsForCheck { offset: count, to, from, previous: results }, { id }, key, callback
+      i += 1
+      count = _.size results
+      @_getResultsForCheck { offset: count, to, from, previous: results, i }, { id }, key, callback
 
   _getTime: ({ time }) =>
     return time - (time % (60))
@@ -118,6 +124,8 @@ class PingdomService
       debug 'pingdom response', { error, statusCode: response?.statusCode }
       return callback error if error?
       return callback new Error('Invalid response') if response.statusCode > 499
-      callback null, JSON.parse body
+      body = JSON.parse body
+      return callback new Error _.get(body, 'error.errormessage') if response.statusCode > 399
+      callback null, body
 
 module.exports = PingdomService
